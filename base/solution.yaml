@@ -1,0 +1,19 @@
+apiVersion: arete/v1alpha1
+kind: Config
+metadata:
+  name: climate-insights-full-base-install
+  annotations:
+    config.kubernetes.io/local-config: "true"
+spec:
+  url: https://github.com/shaunmitchellve/climate-insights-infra/base@main
+  description: |
+    Climate Insights Full Solution base components
+deploy:
+  stage:
+    infra:
+      requires:
+        useConfigConnectorSA: "true"
+        depends:
+          - asset-type: "compute.googleapis.com/Network"
+            scope: "projects/PROJ-ID" # kpt-set: projects/${project-id}
+            name: VPC-NAME # kpt-set: ${network-name}

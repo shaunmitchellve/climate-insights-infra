@@ -1,0 +1,106 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Add all the required roles for IAP administration
+# https://cloud.google.com/iap/docs/using-tcp-forwarding#grant-permission
+########################################
+# Create the Service Account for the Bastion Host VM
+########################################
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMServiceAccount
+metadata: # kpt-merge: config-control/BASTION_SA_NAME
+  annotations:
+    cnrm.cloud.google.com/project-id: GCP-PROJECT-ID # kpt-set: ${project-id}
+    cnrm.cloud.google.com/blueprint: kpt-pkg-fn-live
+  name: climate-insights-bastion-sa # kpt-set: ${bastion-sa-name}
+  namespace: KCC-NAMESPACE
+  labels:
+    created-by-arete: "true"
+spec:
+  displayName: Bastion Host SA
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: k8s-developer-access
+  namespace: KCC-NAMESPACE
+  annotations:
+    cnrm.cloud.google.com/blueprint: kpt-pkg-fn-live
+  labels:
+    created-by-arete: "true"
+spec:
+  memberFrom:
+    serviceAccountRef:
+      name: climate-insights-bastion-sa # kpt-set: ${bastion-sa-name}
+      namespace: KCC-NAMESPACE
+  role: roles/container.developer
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: GCP-PROJECT-ID # kpt-set: ${project-id}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata: # kpt-merge: config-control/iap-user-tunnel
+  name: iap-user-tunnel
+  namespace: KCC-NAMESPACE
+  annotations:
+    cnrm.cloud.google.com/blueprint: kpt-pkg-fn-live
+  labels:
+    created-by-arete: "true"
+spec:
+  member: group:group@example.com # kpt-set: group:${bastion-admins}
+  role: roles/iap.tunnelResourceAccessor
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: GCP-PROJECT-ID # kpt-set: ${project-id}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata: # kpt-merge: config-control/iap-compute-admin
+  name: iap-compute-admin
+  namespace: KCC-NAMESPACE
+  annotations:
+    cnrm.cloud.google.com/blueprint: kpt-pkg-fn-live
+  labels:
+    created-by-arete: "true"
+spec:
+  member: group:group@example.com # kpt-set: group:${bastion-admins}
+  role: roles/compute.instanceAdmin.v1
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: GCP-PROJECT-ID # kpt-set: ${project-id}
+---
+#
+# Add all the required role for IAP administration
+# https://cloud.google.com/compute/docs/instances/managing-instance-access#grant-iam-roles
+#
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata: # kpt-merge: config-control/oslogin-admin
+  name: oslogin-admin
+  namespace: KCC-NAMESPACE
+  annotations:
+    cnrm.cloud.google.com/blueprint: kpt-pkg-fn-live
+  labels:
+    created-by-arete: "true"
+spec:
+  member: group:group@example.com # kpt-set: group:${bastion-admins}
+  role: roles/compute.osAdminLogin
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: GCP-PROJECT-ID # kpt-set: ${project-id}

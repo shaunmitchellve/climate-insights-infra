@@ -1,0 +1,21 @@
+apiVersion: kpt.dev/v1
+kind: Kptfile
+metadata:
+  name: climate-insights
+info:
+  description: Climate Insights infrastructure
+pipeline:
+  mutators:
+    - image: us-central1-docker.pkg.dev/climate-insights/kpt-fn/prv-standard-gke:v0.1.0
+      configPath: interface.yaml
+    - image: gcr.io/kpt-fn/apply-setters:v0.2.0
+      configPath: interface.yaml
+    - image: gcr.io/kpt-fn/enable-gcp-services:v0.1.0
+    - image: gcr.io/kpt-fn/set-labels:v0.1.5
+      configMap:
+        created-by-arete: "true"
+  validators:
+    - image: gcr.io/kpt-fn/kubeval:v0.2
+      configMap:
+        ignore_missing_schemas: "true"
+        string: "true"

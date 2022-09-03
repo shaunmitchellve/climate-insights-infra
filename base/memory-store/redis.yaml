@@ -1,0 +1,17 @@
+apiVersion: redis.cnrm.cloud.google.com/v1beta1
+kind: RedisInstance
+metadata:
+  annotations:
+    cnrm.cloud.google.com/project-id: GCP-PROJECT-ID # kpt-set: ${project-id}
+  name: ce-redis # kpt-set: ${redis-instance}
+  namespace: KCC-NAMESPACE
+  labels:
+    created-by-arete: "true"
+spec:
+  displayName: CE-redis
+  tier: BASIC
+  memorySizeGb: 1
+  region: northamerica-northeast1 # kpt-set: ${region}
+  authorizedNetworkRef:
+    external: default # kpt-set: ${network-name}
+  connectMode: PRIVATE_SERVICE_ACCESS

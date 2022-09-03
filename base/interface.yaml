@@ -1,0 +1,69 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# If you are deploying this infrastructure using arete then a number values will be left at their
+# defaults.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ci-setters
+data:
+  ###
+  # What is the KCC project id
+  #
+  kcc-project-id: KCC-PROJECT-ID # arete-prompt
+  ###
+  # Kubernetes Config Controller should be setup to using the kcc-namespaces solution / blueprint.
+  # What is the namespace in your KCC cluster that has access to create resources in your target project
+  #
+  namespace: KCC-NAMESPACE # arete-prompt
+  ###
+  # Project information on where Climate Insights (CI) will deplployed to
+  #
+  project-id: GCP-PROJECT-ID # arete-prompt
+  region: GCP-REGION # arete-prompt
+  service-account: CI-SERVICE-ACCOUNT # arete-prompt
+  ###
+  # Networking Information for GKE Cluster and SQL Instance
+  #
+  network-name: default
+  ###
+  # Subnet name and CIDR range. This is the primary range used for the GKE nodes and other infra on the subnet
+  #
+  subnetwork-name: ce-subnet
+  subnetwork-range: 10.0.0.0/28
+  ###
+  # Subnet secondary ranges for GKE pods and services.
+  #
+  gke-pods-range-name: gke-pods-range
+  gke-pods-range: 10.4.0.0/14
+  gke-services-range-name: gke-services-range
+  gke-services-range: 10.8.0.0/20
+  ###
+  # The default for CI is to use an internal HTTP(s) proxy loadbalancer for ingress
+  #
+  proxy-subnet-range: 10.129.0.0/23
+  ###
+  # Private GKE Standard Cluster Information
+  # All user access should be Cloud Identity / Google Groups NOT users
+  #
+  cluster-name: climate-insights
+  gke-admin: group@example.com # arete-prompt
+  gke-viewer: group@example.com # arete-prompt
+  ###
+  # Bastion Host Settings
+  #
+  # Service Account name that you want to create for the Bation Host VM
+  bastion-sa-name: climate-insights-bastion-sa
+  # Which group of users are allowed to login to the bastion host
+  bastion-admins: group@example.com # arete-prompt

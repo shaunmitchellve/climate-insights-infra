@@ -1,0 +1,133 @@
+# Copyright 2020 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Create the Climate Insights Service Account
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMServiceAccount
+metadata:
+  annotations:
+    cnrm.cloud.google.com/project-id: GCP-PROJECT-ID # kpt-set: ${project-id}
+    cnrm.cloud.google.com/blueprint: kpt-fn-live
+  name: CI-SERVICE-ACCOUNT # kpt-set: ${service-account}
+  namespace: KCC-NAMESPACE
+  labels:
+    created-by-arete: "true"
+spec:
+  displayName: Climate Insights SA
+---
+#
+# Add all the required roles to the Climate Insights Service Account
+#
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: sa-iam-roles-logwriter
+  namespace: KCC-NAMESPACE
+  annotations:
+    cnrm.cloud.google.com/blueprint: kpt-fn-live
+  labels:
+    created-by-arete: "true"
+spec:
+  member: serviceAccount:CI-SERVICE-ACCOUNT@GCP-PROJECT-ID.iam.gserviceaccount.com # kpt-set: serviceAccount:${service-account}@${project-id}.iam.gserviceaccount.com
+  role: roles/logging.logWriter
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: GCP-PROJECT-ID # kpt-set: ${project-id}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: sa-iam-roles-metricwriter
+  namespace: KCC-NAMESPACE
+  annotations:
+    cnrm.cloud.google.com/blueprint: kpt-fn-live
+  labels:
+    created-by-arete: "true"
+spec:
+  member: serviceAccount:CI-SERVICE-ACCOUNT@GCP-PROJECT-ID.iam.gserviceaccount.com # kpt-set: serviceAccount:${service-account}@${project-id}.iam.gserviceaccount.com
+  role: roles/monitoring.metricWriter
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: GCP-PROJECT-ID # kpt-set: ${project-id}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: sa-iam-roles-monitoring-viewer
+  namespace: KCC-NAMESPACE
+  annotations:
+    cnrm.cloud.google.com/blueprint: kpt-fn-live
+  labels:
+    created-by-arete: "true"
+spec:
+  member: serviceAccount:CI-SERVICE-ACCOUNT@GCP-PROJECT-ID.iam.gserviceaccount.com # kpt-set: serviceAccount:${service-account}@${project-id}.iam.gserviceaccount.com
+  role: roles/monitoring.viewer
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: GCP-PROJECT-ID # kpt-set: ${project-id}
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata:
+  name: sa-iam-roles-storage-ce-data-objectadmin
+  namespace: KCC-NAMESPACE
+  annotations:
+    cnrm.cloud.google.com/blueprint: kpt-fn-live
+    config.kubernetes.io/depends-on: storage.cnrm.cloud.google.com/namespaces/KCC-NAMESPACE/StorageBucket/GCP-PROJECT-ID-ce-data # kpt-set: storage.cnrm.cloud.google.com/namespaces/${namespace}/StorageBucket/${project-id}-ce-data
+  labels:
+    created-by-arete: "true"
+spec:
+  member: serviceAccount:CI-SERVICE-ACCOUNT@GCP-PROJECT-ID.iam.gserviceaccount.com # kpt-set: serviceAccount:${service-account}@${project-id}.iam.gserviceaccount.com
+  role: roles/storage.objectAdmin
+  resourceRef:
+    apiVersion: storage.cnrm.cloud.google.com/v1beta1
+    kind: StorageBucket
+    external: GCP-PROJECT-ID-ce-data # kpt-set: ${project-id}-ce-data
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata: # kpt-merge: config-control/k8s-viewer
+  name: k8s-viewer
+  namespace: KCC-NAMESPACE
+  annotations:
+    cnrm.cloud.google.com/blueprint: kpt-pkg-fn-live
+  labels:
+    created-by-arete: "true"
+spec:
+  member: group:group@example.com # kpt-set: group:${gke-viewer}
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: GCP-PROJECT-ID # kpt-set: ${project-id}
+  role: roles/container.clusterViewer
+---
+apiVersion: iam.cnrm.cloud.google.com/v1beta1
+kind: IAMPolicyMember
+metadata: # kpt-merge: config-control/k8s-admin
+  name: k8s-admin
+  namespace: KCC-NAMESPACE
+  annotations:
+    cnrm.cloud.google.com/blueprint: kpt-pkg-fn-live
+  labels:
+    created-by-arete: "true"
+spec:
+  member: group:group@example.com # kpt-set: group:${gke-admin}
+  resourceRef:
+    apiVersion: resourcemanager.cnrm.cloud.google.com/v1beta1
+    kind: Project
+    external: GCP-PROJECT-ID # kpt-set: ${project-id}
+  role: roles/container.admin

@@ -1,0 +1,19 @@
+apiVersion: arete/v1alpha1
+kind: Config
+metadata:
+  name: climate-insights-full-prv-autopilot
+  annotations:
+    config.kubernetes.io/local-config: "true"
+spec:
+  url: https://github.com/shaunmitchellve/climate-insights-infra/prv-autopilot@main
+  description: |
+    Climate Insights GKE Autopilot
+deploy:
+  stage:
+    infra:
+      requires:
+        useConfigConnectorSA: "true"
+        depends:
+          - asset-type: "compute.googleapis.com/Network"
+            scope: "projects/PROJ-ID" # kpt-set: projects/${project-id}
+            name: VPC-NAME # kpt-set: ${network-name}
