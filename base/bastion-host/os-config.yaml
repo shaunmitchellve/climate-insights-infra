@@ -64,6 +64,20 @@ spec:
                 enforce:
                   interpreter: SHELL
                   script: wget https://github.com/GoogleContainerTools/kpt/releases/download/v1.0.0-beta.13/kpt_linux_amd64 -O /usr/bin/kpt && chmod +x /usr/bin/kpt && exit 100
+            - id: add-glcoud-repo
+              repository:
+                apt:
+                  uri: https://packages.cloud.google.com/apt
+                  archiveType: DEB
+                  distribution: cloud-sdk
+                  components:
+                    - main
+                  gpgKey: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+            - id: update-glcoud
+              pkg:
+                desiredState: INSTALLED
+                apt:
+                  name: google-cloud-sdk-gke-gcloud-auth-plugin
   rollout:
     disruptionBudget:
       percent: 100
